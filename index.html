@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Memuat library MQTT.js via CDN-->
+         <script src="https://unpkg.com/mqtt/dist.mqtt.min.js"></script>
+         <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                background-color: #f4f4f9;
+                margin-top: 50px;
+            }
+            .card{
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+                display: inline-block;
+            }
+            button {
+                font-size: 18px;
+                padding: 12px 25px;
+                margin: 10px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                color: white;
+                font-weight: bold;
+            }
+            .btn-on {background-color: #28a745;}
+            .btn-off {background-color: #dc3545;}
+            button {
+                font-weight: bold;
+                margin-bottom: 20px;
+                color: #555;
+            }
+         </style>
+    </head>
+    <body>
+        <div class="card">
+            <h2>Kontrol Buzzer ESP32</h2>
+            <p id="status">Status: Menghubungkan ke broker....</p>
+
+            <!--Tombol Kontrol-->
+            <button class="btn-on" onclick="kirimPerintah('ON')">NYALAKAN BUZZER</button>
+            <button class="btn-off" onclick="kirimPerintah('OFF')">MATIKAN BUZZER</button>
+        </div>
+        <script>
+            // Menggunakan broker publik gratis yang sama dengan ESP32
+            const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
+            const topic = 'esp32/luthfi/buzzer'; // harus sama perisis dengan di esp32
+
+            // Menghubungkan website ke MQTT Broker via websocket
+            const client = mqtt.connect(brokerUrl);
+            client.on('connect', function(){
+                document.getElementById('status').innerText = 'Status: Terhubung ke Broker (Siap Mengontrol)';
+                document.getElementById('status').style.color = 'green';
+                console.log('Terhubung ke MQTT Broker');
+            });
+
+            client.on('error', function(error){
+                document.getElementById('status').innerText = 'Ststus: Gagal Terhubung!';
+                document.getElementById('status').style.color = 'red';
+                console.log('Koneksi gagal: ', error);
+            });
+
+            // Fungsi untuk mengirim pesan saat tombol diklik
+            function kirimPerintah(perintah){
+                client.publish(topic, perintah, function(err){
+                    if (!err){
+                        console.log('Perintah terkirim: '+ perintah);
+                    } else {
+                        console.log('Gagal mengirim perintah');
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
