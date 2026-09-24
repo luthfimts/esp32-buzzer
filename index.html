@@ -47,9 +47,9 @@
         <p id="status">Status: Menghubungkan ke broker...</p>
         
         <!-- Tombol Kontrol -->
-        <button class="btn-on" onclick="kirimPerintah('ON')">NYALAKAN BUZZER</button>
-        <br>
         <button class="btn-off" onclick="kirimPerintah('OFF')">MATIKAN BUZZER</button>
+        <br>
+        <button class="btn-on" onclick="kirimPerintah('ON')">NYALAKAN BUZZER</button>
     </div>
 
     <script>
@@ -57,18 +57,26 @@
         const brokerUrl = 'wss://broker.emqx.io:8084/mqtt';
         const topic = 'esp32/luthfi/buzzer'; 
 
+        // Opsi koneksi yang sudah diperbaiki
+        const options = {
+            clientId: 'web_client_' + Math.random().toString(16).substring(2, 8),
+            clean: true,
+            connectTimeout: 4000
+        };
+
+        console.log("Mencoba terhubung ke broker...");
         const client = mqtt.connect(brokerUrl, options);
 
         client.on('connect', function () {
             document.getElementById('status').innerText = 'Status: Terhubung ke Broker (Siap Mengontrol)';
             document.getElementById('status').style.color = 'green';
-            console.log('Terhubung ke MQTT Broker');
+            console.log('Berhasil terhubung ke MQTT Broker!');
         });
 
         client.on('error', function (error) {
             document.getElementById('status').innerText = 'Status: Gagal Terhubung!';
             document.getElementById('status').style.color = 'red';
-            console.log('Koneksi gagal: ', error);
+            console.error('Koneksi MQTT Gagal: ', error);
         });
 
         // Fungsi untuk mengirim pesan saat tombol diklik
@@ -76,8 +84,10 @@
             client.publish(topic, perintah, function (err) {
                 if (!err) {
                     console.log('Perintah terkirim: ' + perintah);
+                    alert('Perintah ' + perintah + ' berhasil dikirim!');
                 } else {
-                    console.log('Gagal mengirim perintah');
+                    console.error('Gagal mengirim perintah', err);
+                    alert('Gagal mengirim perintah!');
                 }
             });
         }
